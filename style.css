@@ -1,0 +1,5 @@
+input[type="radio"] {
+  width: 24px;
+  height: 24px;
+  accent-color: #555; /* 色を変えたい場合 */
+}
