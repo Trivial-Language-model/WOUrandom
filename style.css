@@ -3,3 +3,7 @@ input[type="radio"] {
   height: 24px;
   accent-color: #555; /* 色を変えたい場合 */
 }
+
+.WOU {
+  color: red;
+}
