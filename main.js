@@ -1,151 +1,55 @@
-let markovChain = {};
-let typingIntervalId = null;
-let isCooling = false;
+let typingIntervalId=null, isCooling=false;
 
-document.addEventListener('DOMContentLoaded', () => {
-  const generateButton = document.getElementById('generateButton');
-  const output = document.getElementById('output');
+function showTextSlowly(text, interval=100, out, done){
+    out.value=''; let i=0;
+    if(typingIntervalId) clearInterval(typingIntervalId), typingIntervalId=null;
+    typingIntervalId=setInterval(()=>{
+        if(i>=text.length){
+            clearInterval(typingIntervalId); typingIntervalId=null;
+            if(typeof done==='function') done(); return;
+        }
+        out.value += text[i++];
+    }, interval);
+}
 
-  // 辞書データ
-  const rawText = `
-これ -> は
-は -> わたし 君 岩昆虫
-わたし -> の は
-の -> 只 避難訓練 に 名前
-只 -> の
-避難訓練 -> だ
-だ -> よ よ…
-やめろ -> と
-と -> 忠告し
-忠告し -> た
-た -> の ん
-に -> な
-順番 -> は
-君 -> から
-から -> 死ぬ
-岩昆虫 -> の
-名前 -> を
-を -> 言っ
-言っ -> た
-ん -> だ
-`;
+function setCoolingState(on, btn){
+    isCooling = !!on; if(btn) btn.disabled = isCooling;
+    let lbl = document.getElementById('cooldownLabel');
+    if(!lbl){
+        // 既にHTMLにあるので作成不要
+        return;
+    }
+}
 
-  buildMarkovChainFromText(rawText);
+document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = document.getElementById('generateButton'),
+          out = document.getElementById('output'),
+          speedSlider = document.getElementById('speedSlider'),
+          speedValue = document.getElementById('speedValue');
 
-  // 「追跡する」ボタン（generateButton）押下時の挙動
-  generateButton.addEventListener('click', () => {
-    if (isCooling) return;
-
-    const charA = document.getElementById('charA');
-    const charB = document.getElementById('charB');
-
-    // B が選択されている場合は文章生成を行わず emoji のみ表示
-    if (charB && charB.checked) {
-      // クールタイム開始
-      setCoolingState(true, generateButton);
-
-      // 既存の表示中 interval をクリア
-      if (typingIntervalId !== null) {
-        clearInterval(typingIntervalId);
-        typingIntervalId = null;
-      }
-
-      // 👿🦎🍂 を表示（既存の文字送りと同じ挙動）
-      output.textContent = '';
-      showTextSlowly('👿🦎🍂', 80, output, () => {
-        setCoolingState(false, generateButton);
-      });
-      return;
+    // スライダー値表示
+    if(speedSlider && speedValue){
+        speedValue.textContent = speedSlider.value;
+        speedSlider.addEventListener('input', ()=>{
+            speedValue.textContent = speedSlider.value;
+        });
     }
 
-    // A が選択されているか未選択の場合の開始語選択
-    let startWords;
-    if (charA && charA.checked) {
-      startWords = ["これ", "わたし"];
-    } else {
-      startWords = ["これ", "やめろ", "順番", "わたし"];
-    }
+    btn.addEventListener('click', ()=>{
+        if(isCooling) return;
 
-    const sentence = generateText(50, startWords);
+        // ここでスライダー値を取得して interval に変換
+        let speed = speedSlider ? parseInt(speedSlider.value) || 50 : 50;
+        let interval = 200 - speed * 2;
+        if(interval < 1) interval = 1;
 
-    // ボタンを無効化（クールタイム開始）
-    setCoolingState(true, generateButton);
+        const a = document.getElementById('charA'),
+              b = document.getElementById('charB');
 
-    // 既存の表示中 interval をクリアしてから新しい表示を開始
-    if (typingIntervalId !== null) {
-      clearInterval(typingIntervalId);
-      typingIntervalId = null;
-    }
-
-    // 表示完了時にコールバックでボタンを復活させる
-    showTextSlowly(sentence, 80, output, () => {
-      setCoolingState(false, generateButton);
+        if(b && b.checked){
+            showSentenceB(out, btn, interval);
+        } else {
+            showSentenceA(out, btn, interval);
+        }
     });
-  });
 });
-
-function buildMarkovChainFromText(text) {
-  markovChain = {};
-  const lines = text.trim().split('\n');
-  for (let line of lines) {
-    line = line.trim();
-    if (line === '' || !line.includes('->')) continue;
-    const [key, values] = line.split('->').map(part => part.trim());
-    const nextWords = values.split(/\s+/).filter(w => w !== '');
-    if (!markovChain[key]) markovChain[key] = [];
-    markovChain[key].push(...nextWords);
-  }
-}
-
-function generateText(length = 50, startWords = ["これ", "やめろ", "順番", "わたし"]) {
-  let current = startWords[Math.floor(Math.random() * startWords.length)];
-  let result = [current];
-  for (let i = 0; i < length; i++) {
-    const nextWords = markovChain[current];
-    if (!nextWords || nextWords.length === 0) break;
-    current = nextWords[Math.floor(Math.random() * nextWords.length)];
-    result.push(current);
-  }
-  return result.join('');
-}
-
-/**
- * showTextSlowly(text, speed, outputElement, onComplete)
- * - onComplete は全テキスト表示完了時に呼ばれるコールバック
- */
-function showTextSlowly(text, speed = 100, outputElement, onComplete) {
-  outputElement.textContent = '';
-  let index = 0;
-
-  // 既存 interval があればクリア
-  if (typingIntervalId !== null) {
-    clearInterval(typingIntervalId);
-    typingIntervalId = null;
-  }
-
-  typingIntervalId = setInterval(() => {
-    if (index >= text.length) {
-      clearInterval(typingIntervalId);
-      typingIntervalId = null;
-      if (typeof onComplete === 'function') onComplete();
-      return;
-    }
-    outputElement.textContent += text[index];
-    index++;
-  }, speed);
-}
-
-function setCoolingState(isOn, buttonElement) {
-  isCooling = isOn;
-  if (buttonElement) buttonElement.disabled = !!isOn;
-
-  let label = document.getElementById('cooldownLabel');
-  if (!label) {
-    label = document.createElement('span');
-    label.id = 'cooldownLabel';
-    label.style.marginLeft = '8px';
-    if (buttonElement) buttonElement.insertAdjacentElement('afterend', label);
-    else document.body.appendChild(label);
-  }
-  label.textContent = isOn ? ' (表示中...)' : '';
-}

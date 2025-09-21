@@ -7,3 +7,38 @@ input[type="radio"] {
 .WOU {
   color: red;
 }
+
+.button {
+  background-color: #4CAF50; /* 緑色 */
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 8px; /* 角を丸くする */
+  
+  position: relative;
+  left: 720px;
+  bottom: 100px;
+}
+
+#output {
+    height: 120px;
+    width: 500px;           /* 必要に応じて固定幅 */
+    font-size: 18px;
+    line-height: 1.5;
+    font-family: monospace;
+    resize: none;
+    padding: 4px 8px;       /* 左右の余白を確保 */
+}
+
+.title {
+    font-size: 35px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}

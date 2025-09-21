@@ -6,25 +6,37 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>わたしは『ワンダー・オブ・U』</h1>
-  <button id="generateButton">追跡する</button>
-  <p id="output"></p>
+  <h1 class="title">わたしは『ワンダー・オブ・U』</h1>
 
- <input type="radio" name="character" value="A" id="charA" checked>
- <label for="charA">A</label>
+  <button id="generateButton" class="button">追跡する</button>
+<span id="cooldownLabel" style="display:inline-block; min-width:90px; margin-left:8px;"></span>
 
- <input type="radio" name="character" value="B" id="charB">
- <label for="charB">B</label>
+<textarea id="output"></textarea>
 
-  <script src="main.js"></script>
+<input type="radio" name="character" value="A" id="charA" checked>
+<label for="charA">標準型MC</label>
+
+<input type="radio" name="character" value="B" id="charB">
+<label for="charB">細分類階層型MC</label>
+
+<label for="speedSlider">文字送りスピード</label>
+<input type="range" id="speedSlider" min="50" max="100" value="75">
+<span id="speedValue">80</span>
+
 
   <h2>このサイトについて</h2>
+  
     <li>ワンダー・オブ・Uが発したいくつかのセリフを単語で分解し、マルコフ連鎖の要領で新たな文章を生成します。</li>
     <li>「追跡する」ボタンで生成ができます。</li>
-    <li>選択肢AとBがありますが、Aを選択すれば文章を生成するモード、Bを選択すれば絵文字が出るモードに切り替えることが可能です。</li>
+    <li>ラジオボタンの選択で、標準型MCモードと細分類階層型MCモードの切り替えが可能です。</li>
     <li class="WOU">「分をわきまえて　わたしを追跡しなければ……　何事も起こらないのに」</li>
     <li></li>
     <li>※エダハ言語モデル作成の練習用です</li>
 
+  <!-- sentenceHandler.js を main.js より先に読み込む -->
+  <script src="Ａモード.js"></script>
+  <script src="Ｂモード.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
+
